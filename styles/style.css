@@ -1,0 +1,78 @@
+/* General Background Gradient */
+.stApp {
+    background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
+    color: #1f2937;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #0f172a !important;
+    font-weight: 700;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #e2e8f0 !important;
+    padding: 20px;
+    border-radius: 12px;
+}
+section[data-testid="stSidebar"] * {
+    color: #1f2937 !important;
+    font-weight: 600;
+}
+
+/* Buttons and download links */
+.stButton button, .stDownloadButton button {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
+}
+
+/* Metrics Cards */
+.metric-card {
+    background-color: #3b82f6;
+    color: white !important;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 12px;
+    box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease-in-out;
+}
+.metric-card:hover {
+    transform: scale(1.05);
+}
+
+/* Tables/DataFrames */
+.stDataFrame > div {
+    border-radius: 12px !important;
+    overflow-x: auto !important;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Officer Cards */
+.officer-card {
+    margin-bottom: 12px;
+    padding: 15px;
+    border-radius: 12px;
+    background-color: #f1f5f9;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+.officer-card strong {
+    color: #1e3a8a;
+}
+
+/* Intro Paragraph */
+.intro-text {
+    text-align: justify;
+    line-height: 1.6;
+    color: #1f2937;
+    font-size: 15px;
+}
