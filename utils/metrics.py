@@ -66,13 +66,6 @@ def show_metrics(stock, company):
     try:
         info = stock.info
         fi = stock.fast_info
-
-        st.subheader("🛠 Debug - Raw Stock Data")
-        with st.expander("Show raw info dictionary"):
-            st.json(info)
-        with st.expander("Show raw fast_info dictionary"):
-            st.json(dict(fi))
-
         # ---------------- Key Metrics ----------------
         key_metrics = {}
 
@@ -238,3 +231,4 @@ def show_metrics(stock, company):
     except Exception as e:
         st.warning("Could not fetch Key Metrics.")
         st.write(e)
+
