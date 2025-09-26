@@ -2,7 +2,7 @@
 import streamlit as st
 from datetime import datetime
 import pandas as pd
-from config.metric_name import INFO_NOT_AVAILABLE, key_metrics_list, key_metric_mapping, other_metrics_mapping
+from ..config.metric_name import INFO_NOT_AVAILABLE, key_metrics_list, key_metric_mapping, other_metrics_mapping
 import math
 
 def safe_val(x):
@@ -233,4 +233,5 @@ def show_metrics(stock, company):
     except Exception as e:
         st.warning("Could not fetch Key Metrics.")
         st.write(e)
+
 
