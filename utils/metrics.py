@@ -1,9 +1,12 @@
-# stock_market_dashboard/app.py
 import streamlit as st
 from datetime import datetime
 import pandas as pd
-from ..config.metric_name import INFO_NOT_AVAILABLE, key_metrics_list, key_metric_mapping, other_metrics_mapping
+import sys
 import math
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[1]))  # adds stock_market_dashboard to path
+from config.metric_name import INFO_NOT_AVAILABLE, key_metrics_list, key_metric_mapping, other_metrics_mapping
+
 
 def safe_val(x):
     """Return 0 if x is None or NaN"""
@@ -233,5 +236,6 @@ def show_metrics(stock, company):
     except Exception as e:
         st.warning("Could not fetch Key Metrics.")
         st.write(e)
+
 
 
