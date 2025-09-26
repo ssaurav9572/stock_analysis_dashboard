@@ -2,8 +2,40 @@ import streamlit as st
 import pandas as pd
 import io
 from pathlib import Path
+import re
 
 BASE_DIR = Path(__file__).resolve().parent.parent 
+
+import re
+
+def clean_officer_name(full_name):
+    """
+    Remove common degrees/certifications, commas, dots, and extra spaces from officer names.
+    Example:
+        "Mr. Sandeep Bakhshi B.E." -> "Mr Sandeep Bakhshi"
+        "Mr. Rakesh Jha BE, PGDM" -> "Mr Rakesh Jha"
+    """
+    if not full_name:
+        return full_name
+
+    # Common degrees/certifications patterns
+    degree_patterns = [
+        r'\bB\.?E\.?\b', r'\bM\.?E\.?\b', r'\bPGDM\b', r'\bMBA\b', r'\bB\.?Com\.?\b',
+        r'\bM\.?Com\.?\b', r'\bCA\b', r'\bCS\b', r'\bCFA\b', r'\bA\.?C\.?S\.?\b',
+        r'\bF\.?C\.?A\.?\b', r'\bPh\.?D\.?\b'
+    ]
+
+    # Remove degrees/certifications
+    pattern = '|'.join(degree_patterns)
+    cleaned = re.sub(pattern, '', full_name, flags=re.IGNORECASE)
+
+    # Remove commas, dots, multiple spaces, and trim
+    cleaned = re.sub(r'[,\.]+', '', cleaned)
+    cleaned = re.sub(r'\s{2,}', ' ', cleaned)
+    cleaned = cleaned.strip()
+    
+    return cleaned
+
 
 # -------------------------
 # Introduction Page
@@ -53,7 +85,8 @@ def show_introduction(stock, company):
             for officer in valid_officers[:5]:
                 full_name = officer.get("name", "N/A")
                 # Show only first part before comma (or full if no comma)
-                collapsed_name = full_name.split(",")[0] if "," in full_name else full_name
+                collapsed_name = clean_officer_name(full_name)
+
 
                 with st.expander(collapsed_name, expanded=False):  # <-- remove manually added ▼
                     title = officer.get("title", "N/A")
@@ -175,4 +208,3 @@ def show_fundamentals(stock, ticker):
         except Exception as e:
             st.warning(f"{label} not available.")
             st.write(e)
-
