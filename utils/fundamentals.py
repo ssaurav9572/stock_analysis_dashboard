@@ -6,8 +6,6 @@ import re
 
 BASE_DIR = Path(__file__).resolve().parent.parent 
 
-import re
-
 def clean_officer_name(full_name):
     """
     Remove common degrees/certifications, commas, dots, and extra spaces from officer names.
@@ -208,3 +206,4 @@ def show_fundamentals(stock, ticker):
         except Exception as e:
             st.warning(f"{label} not available.")
             st.write(e)
+
