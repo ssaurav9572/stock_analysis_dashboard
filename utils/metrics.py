@@ -101,7 +101,6 @@ def show_metrics(stock, company):
             "operatingCashflow": "Operating Cashflow",
             "grossMargins": "Gross Margins",
             "epsTrailingTwelveMonths": "EPS (Trailing 12M)",
-            "priceEpsCurrentYear": "Price/EPS Current Year",
             "fiveYearAvgDividendYield": "5Y Avg Dividend Yield",
             "forwardPE": "Forward PE",
             "averageVolume": "Average Volume",
@@ -147,3 +146,4 @@ def show_metrics(stock, company):
     except Exception as e:
         st.warning("Could not fetch Key Metrics.")
         st.write(e)
+
