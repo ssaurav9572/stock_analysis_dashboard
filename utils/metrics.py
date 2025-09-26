@@ -33,12 +33,16 @@ def show_metrics(stock, company):
         # Fetch Debt to Equity safely
         debt_to_equity = info.get("debtToEquity") or info.get("debtEquity") or fi.get("debt_to_equity") or "N/A"
         market_cap = fi.get("market_cap") or info.get("marketCap") or info.get("market_cap") or "N/A"
+        net_profit_margin = info.get("profitMargins", "N/A")
+        earning_per_share = info.get("trailingEps") or info.get("epsTrailingTwelveMonths") or "N/A"
+        dividend_payout_ratio = info.get("payoutRatio", "N/A")
+        price_to_earning_ratio = info.get("trailingPE") or info.get("forwardPE") or "N/A"
         # ✅ All metrics you want in Key Metrics
         key_metrics = {
-            "Previous Close": info.get("previousClose", "N/A"),
             "Open": info.get("open", "N/A"),
-            "Day Low": info.get("dayLow", "N/A"),
+            "Previous Close": info.get("previousClose", "N/A"),
             "Day High": info.get("dayHigh", "N/A"),
+            "Day Low": info.get("dayLow", "N/A"),
             "Market Cap": market_cap,
             "52-Week Low": info.get("fiftyTwoWeekLow", "N/A"),
             "52-Week High": info.get("fiftyTwoWeekHigh", "N/A"),
@@ -51,6 +55,10 @@ def show_metrics(stock, company):
             "Regular Market Price": info.get("regularMarketPrice", "N/A"),
             "Dividend Yield": info.get("dividendYield", "N/A"),
             "Total Revenue": info.get("totalRevenue", "N/A"),
+            "Net Profit Margin":net_profit_margin,
+            "Earning per share":earning_per_share,
+            "Dividend payout ratio":dividend_payout_ratio,
+            "Price to Earning ratio":price_to_earning_ratio,
         }
 
         # ✅ Key Metrics Display
@@ -120,7 +128,6 @@ def show_metrics(stock, company):
             "returnOnAssets": "Return on Assets",
             "revenueGrowth": "Revenue Growth",
             "operatingMargins": "Operating Margins",
-            "epsCurrentYear": "EPS Current Year"
         }
         st.subheader("📌 Other Metrics")
         col1, col2, col3 = st.columns(3)
