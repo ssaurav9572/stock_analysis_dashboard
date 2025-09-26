@@ -1,126 +1,209 @@
+# stock_market_dashboard/app.py
 import streamlit as st
 from datetime import datetime
+import pandas as pd
+from config.metrices_name import INFO_NOT_AVAILABLE, key_metrics_list, key_metric_mapping, other_metrics_mapping
+import math
 
-# ✅ Constant for missing data
-INFO_NOT_AVAILABLE = "Information not available"
+def safe_val(x):
+    """Return 0 if x is None or NaN"""
+    if x is None or (isinstance(x, float) and math.isnan(x)):
+        return 0
+    return x
 
-# ✅ Helper function to fetch metrics safely
+# ---------------- Helper Functions ----------------
 def get_metric(info_dict, keys, default=INFO_NOT_AVAILABLE):
-    """
-    Try multiple keys in order and return the first available value.
-    """
+    """Return first available value from keys."""
     for key in keys:
         value = info_dict.get(key)
-        if value is not None:
+        if value not in (None, INFO_NOT_AVAILABLE):
             return value
     return default
 
-# ✅ Format values for display (with price change embedded for Open & Current Price)
+def df_to_serializable_dict(df):
+    """Convert DataFrame to dict with string keys to avoid JSON errors."""
+    if df.empty:
+        return {}
+    df_copy = df.copy()
+    df_copy.index = df_copy.index.map(str)
+    df_copy.columns = df_copy.columns.map(str)
+    return df_copy.to_dict()
+
 def format_value(key, value, key_metrics=None):
+    """Format numbers, percentages, and prices for display."""
     if value is None or value == INFO_NOT_AVAILABLE:
         return INFO_NOT_AVAILABLE
 
-    # Special handling for price metrics vs Previous Close
+    # Price change formatting
     if key in ["Current Price", "Open"] and key_metrics:
         prev_close = key_metrics.get("Previous Close")
         if prev_close not in (None, INFO_NOT_AVAILABLE):
             try:
                 diff = value - prev_close
                 percent = (diff / prev_close) * 100 if prev_close != 0 else 0
-
                 if diff > 0:
-                    change_str = f"<span style='color:green;font-size:13px'>📈 +{diff:.2f} (+{percent:.2f}%)</span>"
+                    change_str = f"<span style='color:green;font-size:13px'>📈 +{round_if_needed(diff)} (+{round_if_needed(percent)}%)</span>"
                 elif diff < 0:
-                    change_str = f"<span style='color:red;font-size:13px'>📉 -{abs(diff):.2f} ({percent:.2f}%)</span>"
+                    change_str = f"<span style='color:red;font-size:13px'>📉 {round_if_needed(diff)} ({round_if_needed(percent)}%)</span>"
                 else:
-                    change_str = f"<span style='color:gray;font-size:13px'>➡️ 0.00 (0.00%)</span>"
-
-                return f"{value}<br>{change_str}"
-            except Exception:
+                    change_str = f"<span style='color:gray;font-size:13px'>➡️ 0 (0%)</span>"
+                return f"{round_if_needed(value)}<br>{change_str}"
+            except:
                 return str(value)
-
-    # Debt to Equity (fixed decimal)
-    if key == "Debt to Equity":
-        return f"{value:.2f}"
 
     # Numeric formatting
     if isinstance(value, (int, float)):
         if "percent" in key.lower() or "yield" in key.lower() or "margins" in key.lower():
-            return f"{value*100:.2f}%" if value < 1 else f"{value:.2f}%"
+            return f"{round_if_needed(value*100)}%" if value < 1 else f"{round_if_needed(value)}%"
         elif "ratio" in key.lower() or "pe" in key.lower():
-            return f"{value:.2f}"
+            return f"{round_if_needed(value)}"
         elif "date" in key.lower() or "epoch" in key.lower() or "yearend" in key.lower():
             try:
                 return datetime.utcfromtimestamp(int(value)).strftime('%Y-%m-%d')
             except:
                 return str(value)
         else:
-            return f"{value:,.0f}"
+            # Use comma for thousands and round if float
+            if isinstance(value, int):
+                return f"{value:,}"
+            else:
+                return f"{round_if_needed(value, True):,}"
 
     return str(value)
 
+def round_if_needed(value, is_float=False):
+    """Round float only if more than 3 decimal places."""
+    if isinstance(value, float):
+        s = str(value)
+        if '.' in s and len(s.split('.')[1]) > 3:
+            return round(value, 3)
+        return value
+    return value
 
-# ✅ Show metrics function
+def calculate_metric_from_statements(metric_name, info, fi, balance_sheet, income_statement, cashflow):
+    """Calculate key metrics from latest fiscal year if not available in info or fi."""
+    try:
+        # Get latest year from statements
+        latest_year_bs = max(balance_sheet.keys(), default=None)
+        latest_year_is = max(income_statement.keys(), default=None)
+        latest_year_cf = max(cashflow.keys(), default=None)
+
+        # Helper to get value safely
+        def get_val(d, key, year=None):
+            if year and year in d:
+                return d[year].get(key, 0)
+            return d.get(key, 0)
+
+        # ---------------- Metric Calculations ----------------
+        if metric_name == "EBITDA":
+            # EBITDA = Operating Revenue - SG&A - Other Non Interest Expense - Occupancy And Equipment + Depreciation + Amortization
+            operating_rev = safe_val(get_val(income_statement, "Operating Revenue", latest_year_is))
+            sg_a = safe_val(get_val(income_statement, "Selling General And Administration", latest_year_is))
+            other_exp = safe_val(get_val(income_statement, "Other Non Interest Expense", latest_year_is))
+            occupancy = safe_val(get_val(income_statement, "Occupancy And Equipment", latest_year_is))
+            depreciation = safe_val(get_val(income_statement, "Depreciation And Amortization In Income Statement", latest_year_is))
+            
+            if None in (operating_rev, sg_a, other_exp, occupancy, depreciation):
+                return INFO_NOT_AVAILABLE
+            
+            ebitda = operating_rev - sg_a - other_exp - occupancy + depreciation
+            return ebitda
+
+        if metric_name == "Current Ratio":
+            # Current Assets / Current Liabilities
+            current_assets = sum([
+                safe_val(get_val(balance_sheet, "Cash And Cash Equivalents", latest_year_bs)),
+                safe_val(get_val(balance_sheet, "Accounts Receivable", latest_year_bs)),
+                safe_val(get_val(balance_sheet, "Other Short Term Investments", latest_year_bs)),
+                safe_val(get_val(balance_sheet, "Prepaid Assets", latest_year_bs))
+            ])
+            current_liabilities = sum([
+                safe_val(get_val(balance_sheet, "Current Debt And Capital Lease Obligation", latest_year_bs)),
+                safe_val(get_val(balance_sheet, "Accounts Payable", latest_year_bs)),
+                safe_val(get_val(balance_sheet, "Current Accrued Expenses", latest_year_bs)),
+                safe_val(get_val(balance_sheet, "Other Payable", latest_year_bs))
+            ])
+            if current_assets and current_liabilities:
+                return current_assets / current_liabilities
+            return INFO_NOT_AVAILABLE
+
+        if metric_name == "Debt to Equity":
+            total_debt = safe_val(get_val(balance_sheet, "Total Debt", latest_year_bs))
+            equity = safe_val(get_val(balance_sheet, "Stockholders Equity", latest_year_bs))
+            if total_debt and equity:
+                return total_debt / equity
+            return INFO_NOT_AVAILABLE
+        
+        if metric_name == "Return on Assets":
+            net_income = get_val(info, "netIncomeToCommon") or get_val(income_statement, "Net Income", latest_year_is)
+            assets = get_val(balance_sheet, "Total Assets", latest_year_bs)
+            return net_income / assets if net_income and assets else INFO_NOT_AVAILABLE
+
+        if metric_name == "Free Cashflow":
+            operating_cf = get_val(info, "operatingCashflow") or get_val(cashflow, "Operating Cash Flow", latest_year_cf)
+            capex = get_val(info, "capitalExpenditures") or get_val(cashflow, "Capital Expenditure", latest_year_cf)
+            return operating_cf - capex if operating_cf is not None and capex is not None else INFO_NOT_AVAILABLE
+
+        if metric_name == "Net Profit Margin":
+            net_income = get_val(info, "netIncomeToCommon") or get_val(income_statement, "Net Income", latest_year_is)
+            revenue = get_val(info, "totalRevenue") or get_val(income_statement, "Total Revenue", latest_year_is)
+            return net_income / revenue if revenue else INFO_NOT_AVAILABLE
+
+        if metric_name == "Operating Margin":
+            operating_income = get_val(info, "operatingIncome") or get_val(income_statement, "Operating Income", latest_year_is)
+            revenue = get_val(info, "totalRevenue") or get_val(income_statement, "Total Revenue", latest_year_is)
+            return operating_income / revenue if revenue else INFO_NOT_AVAILABLE
+
+        if metric_name == "EBITDA Margin":
+            ebitda = get_val(info, "ebitda") or get_val(income_statement, "EBITDA", latest_year_is)
+            revenue = get_val(info, "totalRevenue") or get_val(income_statement, "Total Revenue", latest_year_is)
+            return ebitda / revenue if revenue else INFO_NOT_AVAILABLE
+
+        if metric_name == "Price to Sales":
+            market_cap = get_val(info, "marketCap") or get_val(fi, "marketCap")
+            revenue = get_val(info, "totalRevenue") or get_val(income_statement, "Total Revenue", latest_year_is)
+            return market_cap / revenue if revenue else INFO_NOT_AVAILABLE
+
+        if metric_name == "Gross Margin":
+            revenue = get_val(info, "totalRevenue") or get_val(income_statement, "Total Revenue", latest_year_is)
+            gross_profit = get_val(info, "grossProfits") or get_val(income_statement, "Gross Profit", latest_year_is)
+            return gross_profit / revenue if revenue else INFO_NOT_AVAILABLE
+
+        if metric_name == "EPS Forward":
+            net_income = get_val(info, "netIncomeToCommon") or get_val(income_statement, "Net Income", latest_year_is)
+            shares_out = get_val(info, "sharesOutstanding") or get_val(balance_sheet, "Shares Outstanding", latest_year_bs)
+            return net_income / shares_out if shares_out else INFO_NOT_AVAILABLE
+
+    except:
+        return INFO_NOT_AVAILABLE
+    return INFO_NOT_AVAILABLE
+
+
+# ---------------- Main Show Metrics ----------------
 def show_metrics(stock, company):
     st.header(f"📊 Key Performance Indicators - {company}")
     try:
         info = stock.info
         fi = stock.fast_info
+
+        # Convert DataFrames to dict
+        balance_sheet = df_to_serializable_dict(getattr(stock, "balance_sheet", pd.DataFrame()))
+        income_statement = df_to_serializable_dict(getattr(stock, "financials", pd.DataFrame()))
+        cashflow = df_to_serializable_dict(getattr(stock, "cashflow", pd.DataFrame()))
         # ---------------- Key Metrics ----------------
         key_metrics = {}
+        for metric in key_metrics_list:
+            keys = key_metric_mapping.get(metric, [])
+            value = get_metric(info, keys) or get_metric(fi, keys)
+            if value in (None, INFO_NOT_AVAILABLE):
+                value = calculate_metric_from_statements(metric, info, fi, balance_sheet, income_statement, cashflow)
+            key_metrics[metric] = value if value is not None else INFO_NOT_AVAILABLE
 
-        # Basic Price Metrics
-        key_metrics["Current Price"] = get_metric(info, ["currentPrice"])
-        key_metrics["Open"] = get_metric(info, ["open", "regularMarketOpen"])
-        key_metrics["Previous Close"] = get_metric(info, ["previousClose", "regularMarketPreviousClose"])
-        key_metrics["Day High"] = get_metric(info, ["dayHigh", "regularMarketDayHigh"])
-        key_metrics["Day Low"] = get_metric(info, ["dayLow", "regularMarketDayLow"])
-        key_metrics["Market Cap"] = get_metric(fi, ["marketCap"]) or get_metric(info, ["marketCap", "market_cap"])
-        key_metrics["52-Week Low"] = get_metric(info, ["fiftyTwoWeekLow"])
-        key_metrics["52-Week High"] = get_metric(info, ["fiftyTwoWeekHigh"])
-        key_metrics["EBITDA"] = get_metric(info, ["ebitda"])
-
-        # Debt to Equity
-        debt = get_metric(info, ["totalDebt"])
-        equity = get_metric(info, ["bookValue"])
-        key_metrics["Debt to Equity"] = get_metric(info, ["debtToEquity", "debtEquity"]) \
-                                        or get_metric(fi, ["debt_to_equity"]) \
-                                        or (debt / equity if debt != INFO_NOT_AVAILABLE and equity != INFO_NOT_AVAILABLE else INFO_NOT_AVAILABLE)
-
-        # Current Ratio
-        current_assets = get_metric(info, ["totalCurrentAssets"])
-        current_liabilities = get_metric(info, ["totalCurrentLiabilities"])
-        key_metrics["Current Ratio"] = get_metric(info, ["currentRatio"]) \
-                                       or (current_assets / current_liabilities if current_assets != INFO_NOT_AVAILABLE and current_liabilities != INFO_NOT_AVAILABLE else INFO_NOT_AVAILABLE)
-
-        # Return on Equity (ROE)
-        net_income = get_metric(info, ["netIncomeToCommon"])
-        key_metrics["Return on Equity"] = get_metric(info, ["returnOnEquity"]) \
-                                          or (net_income / equity if net_income != INFO_NOT_AVAILABLE and equity != INFO_NOT_AVAILABLE else INFO_NOT_AVAILABLE)
-
-        # Free Cashflow
-        operating_cf = get_metric(info, ["operatingCashflow"])
-        capex = get_metric(info, ["capitalExpenditures"])
-        key_metrics["Free Cashflow"] = get_metric(info, ["freeCashflow"]) \
-                                       or (operating_cf - capex if operating_cf != INFO_NOT_AVAILABLE and capex != INFO_NOT_AVAILABLE else INFO_NOT_AVAILABLE)
-
-        # Other Key Metrics
-        key_metrics["Recommendation"] = get_metric(info, ["recommendationKey"])
-        key_metrics["Regular Market Price"] = get_metric(info, ["regularMarketPrice"])
-        key_metrics["Dividend Yield"] = get_metric(info, ["dividendYield"])
-        key_metrics["Total Revenue"] = get_metric(info, ["totalRevenue"])
-        key_metrics["Net Profit Margin"] = get_metric(info, ["profitMargins"]) \
-                                           or (net_income / key_metrics["Total Revenue"] if net_income != INFO_NOT_AVAILABLE and key_metrics["Total Revenue"] != INFO_NOT_AVAILABLE else INFO_NOT_AVAILABLE)
-        key_metrics["Earning per share"] = get_metric(info, ["trailingEps", "epsTrailingTwelveMonths"])
-        key_metrics["Dividend payout ratio"] = get_metric(info, ["payoutRatio"])
-        key_metrics["Price to Earning ratio"] = get_metric(info, ["trailingPE", "forwardPE"])
-
-        # Display Key Metrics
         st.subheader("🔥 Key Metrics")
         cols_per_row = 4
-        keys = list(key_metrics.keys())
-        for i in range(0, len(keys), cols_per_row):
-            row_metrics = keys[i:i+cols_per_row]
+        keys_list_ordered = list(key_metrics.keys())
+        for i in range(0, len(keys_list_ordered), cols_per_row):
+            row_metrics = keys_list_ordered[i:i+cols_per_row]
             cols = st.columns(len(row_metrics))
             for col, metric in zip(cols, row_metrics):
                 value = format_value(metric, key_metrics[metric], key_metrics)
@@ -132,91 +215,10 @@ def show_metrics(stock, company):
                 """, unsafe_allow_html=True)
 
         # ---------------- Other Metrics ----------------
-        allowed_other_metrics = {
-            "auditRisk": "Audit Risk",
-            "boardRisk": "Board Risk",
-            "compensationRisk": "Compensation Risk",
-            "shareHolderRightsRisk": "Shareholder Rights Risk",
-            "overallRisk": "Overall Risk",
-            "priceHint": "Price Hint",
-            "dividendRate": "Dividend Rate",
-            "payoutRatio": "Payout Ratio",
-            "regularMarketVolume": "Regular Market Volume",
-            "averageDailyVolume10Day": "Average Daily Volume (10 Day)",
-            "twoHundredDayAverage": "200 Day Average",
-            "heldPercentInsiders": "Held Percent by Insiders",
-            "bookValue": "Book Value",
-            "netIncomeToCommon": "Net Income to Common",
-            "enterpriseToEbitda": "Enterprise to EBITDA",
-            "lastDividendValue": "Last Dividend Value",
-            "targetMeanPrice": "Target Mean Price",
-            "totalCashPerShare": "Total Cash per Share",
-            "quickRatio": "Quick Ratio",
-            "operatingCashflow": "Operating Cashflow",
-            "grossMargins": "Gross Margins",
-            "epsTrailingTwelveMonths": "EPS (Trailing 12M)",
-            "priceEpsCurrentYear": "Price/EPS Current Year",
-            "fiveYearAvgDividendYield": "5Y Avg Dividend Yield",
-            "forwardPE": "Forward PE",
-            "averageVolume": "Average Volume",
-            "priceToSalesTrailing12Months": "Price/Sales (TTM)",
-            "floatShares": "Float Shares",
-            "heldPercentInstitutions": "Held Percent by Institutions",
-            "priceToBook": "Price to Book",
-            "revenuePerShare": "Revenue per Share",
-            "grossProfits": "Gross Profits",
-            "earningsGrowth": "Earnings Growth",
-            "ebitdaMargins": "EBITDA Margins",
-            "epsForward": "EPS Forward",
-            "trailingPegRatio": "Trailing PEG Ratio",
-            "regularMarketPreviousClose": "Regular Market Prev Close",
-            "regularMarketOpen": "Regular Market Open",
-            "regularMarketDayLow": "Regular Market Day Low",
-            "regularMarketDayHigh": "Regular Market Day High",
-            "exDividendDate": "Ex-Dividend Date",
-            "trailingAnnualDividendRate": "Trailing Annual Dividend Rate",
-            "trailingAnnualDividendYield": "Trailing Annual Dividend Yield",
-            "allTimeHigh": "All Time High",
-            "allTimeLow": "All Time Low",
-            "fiftyTwoWeekLowChange": "52-Week Low Change",
-            "fiftyTwoWeekLowChangePercent": "52-Week Low Change Percent",
-            "fiftyTwoWeekRange": "52-Week Range",
-            "fiftyTwoWeekHighChange": "52-Week High Change",
-            "fiftyTwoWeekHighChangePercent": "52-Week High Change Percent",
-            "fiftyTwoWeekChangePercent": "52-Week Change Percent",
-            "epsCurrentYear": "EPS Current Year",
-            "fiftyDayAverageChange": "50-Day Average Change",
-            "fiftyDayAverageChangePercent": "50-Day Average Change Percent",
-            "twoHundredDayAverageChange": "200-Day Average Change",
-            "twoHundredDayAverageChangePercent": "200-Day Average Change Percent",
-            "averageAnalystRating": "Average Analyst Rating",
-            "cryptoTradeable": "Crypto Tradeable",
-            "shares": "Shares",
-            "tenDayAverageVolume": "10-Day Average Volume",
-            "threeMonthAverageVolume": "3-Month Average Volume",
-            "lastPrice": "Last Price",
-            "lastVolume": "Last Volume",
-            "yearChange": "Year Change",
-            "yearHigh": "Year High",
-            "yearLow": "Year Low",
-            "beta": "Beta",
-            "volume": "Volume",
-            "averageVolume10days": "Average Volume (10 Days)",
-            "fiftyDayAverage": "50 Day Average",
-            "enterpriseValue": "Enterprise Value",
-            "sharesOutstanding": "Shares Outstanding",
-            "forwardEps": "Forward EPS",
-            "totalCash": "Total Cash",
-            "totalDebt": "Total Debt",
-            "returnOnAssets": "Return on Assets",
-            "revenueGrowth": "Revenue Growth",
-            "operatingMargins": "Operating Margins",
-        }
-
         st.subheader("📌 Other Metrics")
         col1, col2, col3 = st.columns(3)
         j = 0
-        for key, label in allowed_other_metrics.items():
+        for key, label in other_metrics_mapping.items():
             value = get_metric(info, [key])
             if value != INFO_NOT_AVAILABLE:
                 formatted_value = format_value(key, value)
@@ -231,4 +233,3 @@ def show_metrics(stock, company):
     except Exception as e:
         st.warning("Could not fetch Key Metrics.")
         st.write(e)
-
