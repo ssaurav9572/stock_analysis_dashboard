@@ -24,8 +24,8 @@ def show_introduction(stock, company):
             info.get("address1"),
             info.get("address2"),
             info.get("city"),
-            info.get("zip"),
-            info.get("country")
+            info.get("country"),
+            info.get("zip")
         ]))
         location = ", ".join(filter(None, [
             info.get("city"),
@@ -175,3 +175,4 @@ def show_fundamentals(stock, ticker):
         except Exception as e:
             st.warning(f"{label} not available.")
             st.write(e)
+
