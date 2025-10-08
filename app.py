@@ -12,7 +12,19 @@ def load_css(file_name):
 # Streamlit page config
 st.set_page_config(page_title="📊 Stock Market Dashboard", layout="wide")
 load_css("styles/style.css")
-
+st.markdown("""
+<script>
+    // JS to hide arrow elements on load (mobile-safe)
+    document.addEventListener('DOMContentLoaded', function() {
+        const arrows = document.querySelectorAll('.material-icons, [class*="arrow"]::before');
+        arrows.forEach(el => {
+            if (window.innerWidth < 768) {
+                el.style.display = 'none';
+            }
+        });
+    });
+</script>
+""", unsafe_allow_html=True)
 # NEW: Load Material Icons font to fix arrow rendering
 st.markdown("""
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
