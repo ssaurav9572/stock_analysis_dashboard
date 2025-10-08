@@ -86,7 +86,7 @@ def show_introduction(stock, company):
         valid_officers = [o for o in officers if o.get("name") and o.get("title") and o.get("totalPay")]
 
         if valid_officers:
-            for officer in valid_officers[:5]:
+            for i, officer in enumerate(valid_officers[:5]):
                 full_name = officer.get("name", "N/A")
                 collapsed_name = clean_officer_name(full_name)
                 title = officer.get("title", "N/A")
@@ -97,17 +97,19 @@ def show_introduction(stock, company):
                 else:
                     total_pay = "N/A"
 
-                # Use st.toggle for expand/collapse without icons
-                with st.expander(collapsed_name, expanded=False):  # This still has arrow—wait, no: to avoid, use st.container + toggle
-                    # Alternative: Plain markdown card
-                    st.markdown(f"""
-                    <div class="officer-card">
-                        <strong>Name:</strong> {full_name}<br>
+                # Custom HTML toggle
+                st.markdown(f"""
+                <div class="custom-toggle">
+                    <input type="checkbox" id="toggle_{i}">
+                    <label for="toggle_{i}">{collapsed_name}</label>
+                    <div class="content">
+                        <strong>Full Name:</strong> {full_name}<br>
                         <strong>Title:</strong> {title}<br>
                         <strong>Age:</strong> {age}<br>
                         <strong>Total Pay:</strong> {total_pay}
                     </div>
-                    """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True)
         else:
             st.info("No valid officer information available.")
 
