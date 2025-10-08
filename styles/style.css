@@ -14,7 +14,7 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);  /* Subtle shadow for depth */
 }
 
-/* NEW: Fix for arrow icons rendering as text (e.g., keyboard_double_arrow_right) */
+/* ENHANCED: Fix for arrow icons rendering as text (e.g., keyboard_double_arrow_right) */
 [class*="material-icons"], [class*="mdi-"], .stMetric .stMetricLabel .material-icons {
     font-family: 'Material Icons', 'Material Design Icons', sans-serif !important;
     font-size: 16px !important;  /* Smaller for mobile */
@@ -30,7 +30,18 @@ h1, h2, h3, h4, h5, h6 {
     content: none !important;  /* Suppress text like 'keyboard_double_arrow_right' */
 }
 
-/* Metrics deltas: Style arrows properly */
+/* NEW: Strong suppression for expanders and metric deltas */
+.stExpander > label::before,
+.stMetricDelta::before {
+    content: '' !important;
+    display: none !important;
+    visibility: hidden !important;
+}
+.stExpander > label {
+    padding-left: 0 !important;  /* Remove space for arrow */
+}
+
+/* Metrics deltas: Style arrows properly (text fallback if needed) */
 .stMetric > label > span:last-child {
     font-family: 'Material Icons' !important;
     content: 'arrow_upward' !important;  /* Or use CSS for dynamic up/down */
@@ -104,13 +115,26 @@ section[data-testid="stSidebar"] * {
     .stSelectbox {
         font-size: 13px !important;  /* Slightly larger for touch */
     }
-    /* Mobile icon fix: Smaller and hidden text fallbacks */
+    /* ENHANCED Mobile icon fix: Smaller, hidden text fallbacks, and no overlap */
     [class*="material-icons"] {
         font-size: 14px !important;
     }
     .stMetric > div > div:last-child::before,
     .stExpander > label::before {
         display: none !important;  /* Aggressive hide on mobile */
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    .stExpander > label {
+        padding-left: 0 !important;
+        margin-left: -8px !important;  /* Pull left to avoid overlap */
+    }
+    /* Prevent overlap on headers/officers */
+    h3, h4, .officer-card {
+        position: relative;
+        z-index: 10;  /* Ensure text above any hidden elements */
+        margin-top: 8px !important;
     }
 }
 
