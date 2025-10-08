@@ -136,6 +136,36 @@ section[data-testid="stSidebar"] * {
         z-index: 10;  /* Ensure text above any hidden elements */
         margin-top: 8px !important;
     }
+    /* Ultimate mobile arrow killer */
+    .stExpander label::before,
+    .stMetricDelta::before,
+    [data-testid="stMetricDelta"]::before,
+    .material-icons::before {
+        content: '' !important;
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;  /* Off-screen if needed */
+        left: -9999px !important;
+    }
+    /* Clip any overlapping text */
+    .stExpander label,
+    .stMetric > label {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;  /* Prevent wrap/overlap */
+    }
+    /* Officer cards: Extra margin to avoid header bleed */
+    .officer-card {
+        margin-top: 12px !important;
+        padding-top: 16px !important;
+    }
+    h3, h4 {
+        margin-top: 16px !important;  /* Space from any hidden elements */
+        overflow: visible !important;
+    }
 }
 
 /* Buttons and download links - Brighter on dark bg */
@@ -264,6 +294,12 @@ section[data-testid="stSidebar"] * {
         font-size: 1rem;
         padding: 1rem;
     }
+}
+
+/* Clean header class for metrics labels */
+.clean-header::before {
+    content: none !important;  /* No pseudo-elements */
+    display: inline !important;
 }
 
 /* Ensure font fallback for symbols and light text */
