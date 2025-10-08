@@ -89,16 +89,16 @@ def show_introduction(stock, company):
             officer_html = officer_file.read_text(encoding="utf-8")
             for officer in valid_officers[:5]:
                 full_name = officer.get("name", "N/A")
-                collapsed_name = clean_officer_name(full_name)
+                collapsed_name = clean_officer_name(full_name)  # For display if needed
                 title = officer.get("title", "N/A")
                 age = officer.get("age", "N/A")
                 total_pay = officer.get("totalPay")
                 if isinstance(total_pay, (int, float)):
-                    total_pay = f"${total_pay:,}"  # Assuming USD, adjust if needed
+                    total_pay = f"${total_pay:,}"
                 else:
                     total_pay = "N/A"
 
-                # Render HTML template
+                # Render as plain card—no expander arrow
                 rendered_html = officer_html.replace("{{ name }}", full_name).replace("{{ title }}", title).replace("{{ age }}", str(age)).replace("{{ total_pay }}", total_pay)
                 st.markdown(f'<div class="officer-card">{rendered_html}</div>', unsafe_allow_html=True)
         else:
