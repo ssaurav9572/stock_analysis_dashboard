@@ -44,12 +44,15 @@ def show_introduction(stock, company):
         info = stock.info
         description = info.get("longBusinessSummary", "Description not available.")
 
-        # ✅ Company description
+        # ✅ Company description - Using intro.html
         intro_file = BASE_DIR / "templates" / "intro.html"
         intro_html = intro_file.read_text(encoding="utf-8")
-        st.markdown(intro_html.replace("{{ description }}", description), unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="intro-text">{intro_html.replace("{{ description }}", description)}</div>',
+            unsafe_allow_html=True
+        )
 
-        # ✅ Company details
+        # ✅ Company details - Use columns for better layout (responsive)
         address = ", ".join(filter(None, [
             info.get("address1"),
             info.get("address2"),
@@ -61,7 +64,6 @@ def show_introduction(stock, company):
             info.get("city"),
             info.get("country")
         ]))
-        st.subheader("🏢 Company Details")
         details = {
             "Address": address,
             "City": location,
@@ -71,37 +73,41 @@ def show_introduction(stock, company):
             "Sector": info.get("sectorDisp", "N/A"),
             "Total Employees": f"{info.get('fullTimeEmployees'):,}" if info.get("fullTimeEmployees") else "N/A",
         }
-        for key, value in details.items():
-            st.write(f"**{key}:** {value}")
+        st.subheader("🏢 Company Details")
+        cols = st.columns(2)  # 2 columns on desktop, stacks on mobile
+        for i, (key, value) in enumerate(details.items()):
+            with cols[i % 2]:
+                st.write(f"**{key}:** {value}")
 
-        # ✅ Company officers
+        # ✅ Company officers - Using officer.html template
         st.subheader("👨‍💼 Company Officers")
         officers = info.get("companyOfficers", [])
         valid_officers = [o for o in officers if o.get("name") and o.get("title") and o.get("totalPay")]
 
         if valid_officers:
+            officer_file = BASE_DIR / "templates" / "officer.html"
+            officer_html = officer_file.read_text(encoding="utf-8")
             for officer in valid_officers[:5]:
                 full_name = officer.get("name", "N/A")
-                # Show only first part before comma (or full if no comma)
                 collapsed_name = clean_officer_name(full_name)
+                title = officer.get("title", "N/A")
+                age = officer.get("age", "N/A")
+                total_pay = officer.get("totalPay")
+                if isinstance(total_pay, (int, float)):
+                    total_pay = f"${total_pay:,}"  # Assuming USD, adjust if needed
+                else:
+                    total_pay = "N/A"
 
-
-                with st.expander(collapsed_name, expanded=False):  # <-- remove manually added ▼
-                    title = officer.get("title", "N/A")
-                    age = officer.get("age", "N/A")
-                    total_pay = officer.get("totalPay")
-                    if isinstance(total_pay, (int, float)):
-                        total_pay = f"{total_pay:,}"
-                    else:
-                        total_pay = "N/A"
-
-                    st.write(f"**Full Name:** {full_name}")
-                    st.write(f"**Title:** {title}")
-                    st.write(f"**Age:** {age}")
-                    st.write(f"**Total Pay:** {total_pay}")
+                # Render HTML template
+                rendered_html = officer_html.replace("{{ name }}", full_name).replace("{{ title }}", title).replace("{{ age }}", str(age)).replace("{{ total_pay }}", total_pay)
+                st.markdown(f'<div class="officer-card">{rendered_html}</div>', unsafe_allow_html=True)
         else:
-            st.write("No valid officer information available.")
-        # ✅ Current price with arrow + % change
+            st.info("No valid officer information available.")
+
+        # ✅ Current price with arrow + % change - Custom card
+        # ... (rest of the file unchanged until Current Price section)
+
+        # ✅ Current price with arrow + % change - Custom card
         st.subheader("💰 Current Price")
         try:
             price = stock.history(period="1d")['Close'].iloc[-1]
@@ -114,23 +120,26 @@ def show_introduction(stock, company):
                 # Green arrow if price went up, red if down
                 if change > 0:
                     arrow = "⬆️"
-                    color = "green"
+                    change_str = f"+&#x20B9;{change:.2f} ({pct_change:+.2f}%)"
+                    card_class = "current-price-card"
                 elif change < 0:
                     arrow = "⬇️"
-                    color = "red"
+                    change_str = f"&#x20B9;{abs(change):.2f} ({pct_change:+.2f}%)"
+                    card_class = "current-price-card negative"
                 else:
                     arrow = "➡️"
-                    color = "gray"
+                    change_str = "No change"
+                    card_class = "current-price-card"
 
                 st.markdown(
-                    f"<div style='font-size:18px;'>"
-                    f"<b>₹{price:,.2f}</b> "
-                    f"<span style='color:{color};'>{arrow} {change:+.2f} ({pct_change:+.2f}%)</span>"
-                    f"</div>",
+                    f'<div class="{card_class}">'
+                    f'<div style="font-size: 1.5rem; margin-bottom: 0.5rem;">&#x20B9;{price:,.2f}</div>'
+                    f'<div>{arrow} {change_str}</div>'
+                    f'</div>',
                     unsafe_allow_html=True
                 )
             else:
-                st.metric("Price", f"₹{price:,.2f}")
+                st.markdown(f'<div class="current-price-card">&#x20B9;{price:,.2f}</div>', unsafe_allow_html=True)
 
         except Exception as e:
             st.warning("Current price not available.")
@@ -170,7 +179,7 @@ def show_fundamentals(stock, ticker):
         if df is not None and not df.empty:
             st.subheader(title)
             df_display = format_df(df)
-            st.dataframe(df_display, height=500, width=1200)
+            st.dataframe(df_display, height=500, width=1200, use_container_width=True)  # Added use_container_width for mobile
 
             csv = df.to_csv().encode('utf-8')
             st.download_button(
@@ -206,4 +215,3 @@ def show_fundamentals(stock, ticker):
         except Exception as e:
             st.warning(f"{label} not available.")
             st.write(e)
-
