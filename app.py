@@ -1,410 +1,68 @@
-/* Dark Theme: General Background Gradient */
-.stApp {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-    color: #f1f5f9;  /* Lighter text */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-}
+import streamlit as st
+import yfinance as yf
+from config.stock_categories import stock_categories
+from utils import fundamentals, charts, indicators, metrics
+from pathlib import Path
 
-/* Headings - Simplified to solid light color for better visibility */
-h1, h2, h3, h4, h5, h6 {
-    color: #e2e8f0 !important;  /* Solid light color - no gradient to avoid rendering issues */
-    font-weight: 700 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);  /* Subtle shadow for depth */
-}
+# Load CSS
+def load_css(file_name):
+    with open(file_name, "r") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-/* ENHANCED: Fix for arrow icons rendering as text (e.g., keyboard_double_arrow_right) */
-[class*="material-icons"], [class*="mdi-"], .stMetric .stMetricLabel .material-icons {
-    font-family: 'Material Icons', 'Material Design Icons', sans-serif !important;
-    font-size: 16px !important;  /* Smaller for mobile */
-    color: #e2e8f0 !important;
-    vertical-align: middle;
-    margin-right: 4px;
-}
+# Streamlit page config
+st.set_page_config(page_title="📊 Stock Market Dashboard", layout="wide")
+load_css("styles/style.css")
+# NEW: Load Material Icons font to fix arrow rendering
+st.markdown("""
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+    .stApp [class*="material-icons"] {
+        font-family: 'Material Icons' !important;
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-/* Hide text fallbacks for icons in metrics deltas and expanders */
-.stMetric > div > div:last-child::before,
-.stExpander > label::before,
-.stCheckbox > label::before {
-    content: none !important;  /* Suppress text like 'keyboard_double_arrow_right' */
-}
+st.title("📊 Stock Market Dashboard")
 
-/* NEW: Strong suppression for expanders and metric deltas */
-.stExpander > label::before,
-.stMetricDelta::before {
-    content: '' !important;
-    display: none !important;
-    visibility: hidden !important;
-}
-.stExpander > label {
-    padding-left: 0 !important;  /* Remove space for arrow */
-}
+# Sidebar selections (keep for filters)
+category = st.sidebar.selectbox("Select Stock Category", list(stock_categories.keys()))
+company = st.sidebar.selectbox("Select a Company", list(stock_categories[category].keys()))
+ticker = stock_categories[category][company]
 
-/* Metrics deltas: Style arrows properly (text fallback if needed) */
-.stMetric > label > span:last-child {
-    font-family: 'Material Icons' !important;
-    content: 'arrow_upward' !important;  /* Or use CSS for dynamic up/down */
-}
-.stMetric [data-testid="metric-delta"] {
-    color: #10b981 !important;  /* Green for positive */
-}
-.stMetric [data-testid="metric-delta-negative"] {
-    color: #ef4444 !important;  /* Red for negative */
-}
-
-/* Sidebar - Darker with light text */
-section[data-testid="stSidebar"] {
-    background: linear-gradient(to bottom, #1e293b, #334155) !important;
-    padding: 1rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);  /* Deeper shadow */
-}
-section[data-testid="stSidebar"] * {
-    color: #e2e8f0 !important;  /* Lighter sidebar text */
-    font-weight: 600;
-}
-
-/* Darken selectbox containers and options for visibility */
-.stSelectbox {
-    background-color: #1e1e1e !important;  /* Solid black/dark bg for the box */
-    border: 1px solid #475569 !important;  /* Subtle dark border */
-    border-radius: 6px !important;
-    color: #e2e8f0 !important;  /* Light text in selectbox */
-}
-.stSelectbox > div > div {
-    background-color: #1e1e1e !important;  /* Darken the input field */
-    color: #e2e8f0 !important;
-}
-.stSelectbox .css-1gyyuii {  /* Target dropdown arrow/button */
-    background-color: #334155 !important;
-    border: none !important;
-}
-.stSelectbox .css-1gyyuii:hover {
-    background-color: #475569 !important;
-}
-/* Darken dropdown menu/options */
-.stSelectbox div[role="listbox"] {
-    background-color: #1e293b !important;
-    border: 1px solid #475569 !important;
-    color: #e2e8f0 !important;
-}
-.stSelectbox div[role="option"] {
-    background-color: #1e293b !important;
-    color: #e2e8f0 !important;
-    border-bottom: 1px solid #334155 !important;
-}
-.stSelectbox div[role="option"]:hover {
-    background-color: #334155 !important;
-    color: #f1f5f9 !important;
-}
-
-/* Sidebar on mobile: Full height, easier access */
-@media (max-width: 768px) {
-    section[data-testid="stSidebar"] {
-        width: 100% !important;
-        padding: 0.5rem;
-        border-radius: 0;
-        background: #1e293b !important;  /* Solid dark on mobile */
-    }
-    section[data-testid="stSidebar"] .stSelectbox > div > div > div {
-        font-size: 12px;
-        color: #e2e8f0;
-        background-color: #1e1e1e !important;  /* Ensure mobile selectbox dark */
-    }
-    .stSelectbox {
-        font-size: 13px !important;  /* Slightly larger for touch */
-    }
-    /* ENHANCED Mobile icon fix: Smaller, hidden text fallbacks, and no overlap */
-    [class*="material-icons"] {
-        font-size: 14px !important;
-    }
-    .stMetric > div > div:last-child::before,
-    .stExpander > label::before {
-        display: none !important;  /* Aggressive hide on mobile */
-        visibility: hidden !important;
-        width: 0 !important;
-        height: 0 !important;
-    }
-    .stExpander > label {
-        padding-left: 0 !important;
-        margin-left: -8px !important;  /* Pull left to avoid overlap */
-    }
-    /* Prevent overlap on headers/officers */
-    h3, h4, .officer-card {
-        position: relative;
-        z-index: 10;  /* Ensure text above any hidden elements */
-        margin-top: 8px !important;
-    }
-    /* Ultimate mobile arrow killer */
-    .stExpander label::before,
-    .stMetricDelta::before,
-    [data-testid="stMetricDelta"]::before,
-    .material-icons::before {
-        content: '' !important;
-        display: none !important;
-        visibility: hidden !important;
-        width: 0 !important;
-        height: 0 !important;
-        overflow: hidden !important;
-        position: absolute !important;  /* Off-screen if needed */
-        left: -9999px !important;
-    }
-    /* Clip any overlapping text */
-    .stExpander label,
-    .stMetric > label {
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;  /* Prevent wrap/overlap */
-    }
-    /* Officer cards: Extra margin to avoid header bleed */
-    .officer-card {
-        margin-top: 12px !important;
-        padding-top: 16px !important;
-    }
-    h3, h4 {
-        margin-top: 16px !important;  /* Space from any hidden elements */
-        overflow: visible !important;
-    }
-}
-
-/* Buttons and download links - Brighter on dark bg */
-.stButton button, .stDownloadButton button {
-    background: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
-    color: white !important;
-    font-weight: 600 !important;
-    border-radius: 8px !important;
-    padding: 0.75rem 1.5rem !important;
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);  /* Glow effect */
-    transition: all 0.2s ease;
-    border: none;
-}
-.stButton button:hover, .stDownloadButton button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.5);  /* Brighter hover */
-    background: linear-gradient(to right, #1d4ed8, #1e40af);
-}
-@media (max-width: 768px) {
-    .stButton button, .stDownloadButton button {
-        padding: 0.5rem 1rem;  /* Smaller touch targets */
-    }
-}
-
-/* Metrics Cards - Darker bg with light text */
-.metric-card {
-    background: linear-gradient(135deg, #1e40af, #1e3a8a);  /* Darker blue */
-    color: #f1f5f9 !important;  /* Light text */
-    padding: 1.5rem;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-.metric-card::before {
-    content: 'Metrics';
-    font-size: 1.2rem;
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: normal;
-    opacity: 0.9;
-    color: #e2e8f0;
-}
-.metric-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.5);
-}
-
-/* Tables/DataFrames - Dark mode styling */
-.stDataFrame > div {
-    border-radius: 12px !important;
-    overflow-x: auto !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    background: #1e293b;  /* Dark table bg */
-    color: #f1f5f9;  /* Light text in tables */
-}
-.stDataFrame > div table {
-    color: #f1f5f9;  /* Ensure table text is light */
-}
-@media (max-width: 768px) {
-    .stDataFrame > div {
-        font-size: 12px;
-    }
-}
-
-/* Officer Cards - Darker with light text */
-.officer-card {
-    margin-bottom: 1rem;
-    padding: 1.25rem;
-    border-radius: 12px;
-    background: linear-gradient(to bottom, #334155, #475569);  /* Dark slate */
-    color: #f1f5f9;  /* Light text */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    border-left: 4px solid #3b82f6;
-    transition: box-shadow 0.2s ease;
-}
-.officer-card:hover {
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
-}
-.officer-card strong {
-    color: #60a5fa;  /* Lighter blue for emphasis */
-    font-size: 1.1em;
-}
-
-/* Intro Paragraph - Dark bg with light text */
-.intro-text {
-    text-align: justify;
-    line-height: 1.8;
-    color: #e2e8f0;  /* Lighter body text */
-    font-size: 15px;
-    padding: 1rem;
-    background: rgba(51, 65, 85, 0.8);  /* Semi-transparent dark */
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-@media (max-width: 768px) {
-    .intro-text {
-        font-size: 14px;
-        padding: 0.75rem;
-    }
-}
-
-/* Current Price Section - Adjusted for dark theme */
-.current-price-card {
-    background: linear-gradient(135deg, #10b981, #059669);  /* Keep green for positives */
-    color: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    margin: 1rem 0;
-}
-.current-price-card .negative {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-}
-@media (max-width: 768px) {
-    .current-price-card {
-        font-size: 1rem;
-        padding: 1rem;
-    }
-}
-
-/* Clean header class for metrics labels */
-.clean-header::before {
-    content: none !important;  /* No pseudo-elements */
-    display: inline !important;
-}
-
-/* Custom HTML Toggle for Officers (CSS-only accordion) */
-.custom-toggle {
-    margin-bottom: 1rem;
-}
-.custom-toggle input[type="checkbox"] {
-    display: none;  /* Hide checkbox */
-}
-.custom-toggle label {
-    display: block;
-    padding: 12px;
-    background: linear-gradient(to bottom, #334155, #475569);
-    color: #e2e8f0;
-    font-weight: 600;
-    border-radius: 8px 8px 0 0;
-    cursor: pointer;
-    border-left: 4px solid #3b82f6;
-    transition: background 0.2s ease;
-    position: relative;
-}
-.custom-toggle label:hover {
-    background: linear-gradient(to bottom, #475569, #64748b);
-}
-.custom-toggle label::after {
-    content: '+';  /* Custom + text instead of icon */
-    position: absolute;
-    right: 12px;
-    font-size: 18px;
-    transition: transform 0.2s ease;
-}
-.custom-toggle input:checked + label::after {
-    content: '−';  /* - when open */
-    transform: rotate(180deg);
-}
-.custom-toggle .content {
-    max-height: 0;
-    overflow: hidden;
-    background: #334155;
-    border-radius: 0 0 8px 8px;
-    transition: max-height 0.3s ease;
-    padding: 0 12px;
-}
-.custom-toggle input:checked + label + .content {
-    max-height: 200px;  /* Adjust based on content */
-    padding: 12px;
-}
-.custom-toggle .content strong {
-    color: #60a5fa;
-}
-
-/* Custom Metric Cards (No icons, text deltas) */
-.custom-metric {
-    background: linear-gradient(135deg, #1e40af, #1e3a8a);
-    color: #f1f5f9;
-    padding: 1rem;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
-}
-.custom-metric .delta {
-    font-size: 0.9rem;
-    margin-top: 0.25rem;
-}
-.custom-metric .delta.positive {
-    color: #10b981;  /* Green text */
-}
-.custom-metric .delta.negative {
-    color: #ef4444;  /* Red text */
-}
-
-/* Mobile tweaks for custom elements */
-@media (max-width: 768px) {
-    .custom-toggle label {
-        font-size: 14px;
-        padding: 10px;
-    }
-    .custom-toggle .content {
-        font-size: 13px;
-        padding: 10px;
-    }
-    .custom-metric {
-        padding: 0.75rem;
-        font-size: 14px;
-    }
-}
-
-/* Ensure font fallback for symbols and light text */
-.stApp * {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif !important;
-    color: #f1f5f9;  /* Global light text override */
-}
-
-/* General responsiveness: Reduce padding on mobile */
-@media (max-width: 768px) {
-    .stApp {
-        font-size: 13px;
-    }
-    h1 { font-size: 1.5rem !important; }
-    h2 { font-size: 1.25rem !important; }
-    h3 { font-size: 1.1rem !important; }
-    section[data-testid="stMarkdownContainer"] {
-        padding: 0.5rem !important;
-        background: transparent;  /* No bg on dark mobile */
-    }
-}
+if ticker:
+    stock = yf.Ticker(ticker)
+    
+    # Use tabs for sections (replaces radio)
+    tab_introduction, tab_metrics, tab_fundamentals, tab_charts, tab_indicators = st.tabs(
+        ["Introduction", "Key Metrics", "Fundamentals", "Charts", "Technical Indicators"]
+    )
+    
+    # Render content inside each tab
+    with tab_introduction:
+        fundamentals.show_introduction(stock, company)
+    
+    with tab_metrics:
+        metrics.show_metrics(stock, company)
+    
+    with tab_fundamentals:
+        fundamentals.show_fundamentals(stock, ticker)
+    
+    with tab_charts:
+        charts.show_charts(stock, company)
+    
+    with tab_indicators:
+        indicators.show_indicators(stock, company)
+else:
+    st.warning("Please select a category and company.")
