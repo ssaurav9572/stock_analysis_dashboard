@@ -1,78 +1,227 @@
-/* General Background Gradient */
+/* Dark Theme: General Background Gradient */
 .stApp {
-    background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
-    color: #1f2937;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    color: #f1f5f9;  /* Lighter text */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
+    line-height: 1.6;
 }
 
-/* Headings */
+/* Headings - Simplified to solid light color for better visibility */
 h1, h2, h3, h4, h5, h6 {
-    color: #0f172a !important;
-    font-weight: 700;
+    color: #e2e8f0 !important;  /* Solid light color - no gradient to avoid rendering issues */
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);  /* Subtle shadow for depth */
 }
 
-/* Sidebar */
+/* Sidebar - Darker with light text */
 section[data-testid="stSidebar"] {
-    background-color: #e2e8f0 !important;
-    padding: 20px;
+    background: linear-gradient(to bottom, #1e293b, #334155) !important;
+    padding: 1rem;
     border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);  /* Deeper shadow */
 }
 section[data-testid="stSidebar"] * {
-    color: #1f2937 !important;
+    color: #e2e8f0 !important;  /* Lighter sidebar text */
     font-weight: 600;
 }
 
-/* Buttons and download links */
+/* Darken selectbox containers and options for visibility */
+.stSelectbox {
+    background-color: #1e1e1e !important;  /* Solid black/dark bg for the box */
+    border: 1px solid #475569 !important;  /* Subtle dark border */
+    border-radius: 6px !important;
+    color: #e2e8f0 !important;  /* Light text in selectbox */
+}
+.stSelectbox > div > div {
+    background-color: #1e1e1e !important;  /* Darken the input field */
+    color: #e2e8f0 !important;
+}
+.stSelectbox .css-1gyyuii {  /* Target dropdown arrow/button */
+    background-color: #334155 !important;
+    border: none !important;
+}
+.stSelectbox .css-1gyyuii:hover {
+    background-color: #475569 !important;
+}
+/* Darken dropdown menu/options */
+.stSelectbox div[role="listbox"] {
+    background-color: #1e293b !important;
+    border: 1px solid #475569 !important;
+    color: #e2e8f0 !important;
+}
+.stSelectbox div[role="option"] {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-bottom: 1px solid #334155 !important;
+}
+.stSelectbox div[role="option"]:hover {
+    background-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Sidebar on mobile: Full height, easier access */
+@media (max-width: 768px) {
+    section[data-testid="stSidebar"] {
+        width: 100% !important;
+        padding: 0.5rem;
+        border-radius: 0;
+        background: #1e293b !important;  /* Solid dark on mobile */
+    }
+    section[data-testid="stSidebar"] .stSelectbox > div > div > div {
+        font-size: 12px;
+        color: #e2e8f0;
+        background-color: #1e1e1e !important;  /* Ensure mobile selectbox dark */
+    }
+    .stSelectbox {
+        font-size: 13px !important;  /* Slightly larger for touch */
+    }
+}
+
+/* Buttons and download links - Brighter on dark bg */
 .stButton button, .stDownloadButton button {
-    background-color: #3b82f6 !important;
+    background: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
     color: white !important;
     font-weight: 600 !important;
     border-radius: 8px !important;
-    padding: 8px 16px !important;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
+    padding: 0.75rem 1.5rem !important;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);  /* Glow effect */
+    transition: all 0.2s ease;
+    border: none;
+}
+.stButton button:hover, .stDownloadButton button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.5);  /* Brighter hover */
+    background: linear-gradient(to right, #1d4ed8, #1e40af);
+}
+@media (max-width: 768px) {
+    .stButton button, .stDownloadButton button {
+        padding: 0.5rem 1rem;  /* Smaller touch targets */
+    }
 }
 
-/* Metrics Cards */
+/* Metrics Cards - Darker bg with light text */
 .metric-card {
-    background-color: #3b82f6;
-    color: white !important;
-    padding: 20px;
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);  /* Darker blue */
+    color: #f1f5f9 !important;  /* Light text */
+    padding: 1.5rem;
     border-radius: 12px;
     text-align: center;
     font-weight: bold;
     font-size: 16px;
-    margin-bottom: 12px;
-    box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
-    transition: transform 0.2s ease-in-out;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.metric-card::before {
+    content: 'Metrics';
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+    opacity: 0.9;
+    color: #e2e8f0;
 }
 .metric-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.5);
 }
 
-/* Tables/DataFrames */
+/* Tables/DataFrames - Dark mode styling */
 .stDataFrame > div {
     border-radius: 12px !important;
     overflow-x: auto !important;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background: #1e293b;  /* Dark table bg */
+    color: #f1f5f9;  /* Light text in tables */
+}
+.stDataFrame > div table {
+    color: #f1f5f9;  /* Ensure table text is light */
+}
+@media (max-width: 768px) {
+    .stDataFrame > div {
+        font-size: 12px;
+    }
 }
 
-/* Officer Cards */
+/* Officer Cards - Darker with light text */
 .officer-card {
-    margin-bottom: 12px;
-    padding: 15px;
+    margin-bottom: 1rem;
+    padding: 1.25rem;
     border-radius: 12px;
-    background-color: #f1f5f9;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    background: linear-gradient(to bottom, #334155, #475569);  /* Dark slate */
+    color: #f1f5f9;  /* Light text */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-left: 4px solid #3b82f6;
+    transition: box-shadow 0.2s ease;
+}
+.officer-card:hover {
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 .officer-card strong {
-    color: #1e3a8a;
+    color: #60a5fa;  /* Lighter blue for emphasis */
+    font-size: 1.1em;
 }
 
-/* Intro Paragraph */
+/* Intro Paragraph - Dark bg with light text */
 .intro-text {
     text-align: justify;
-    line-height: 1.6;
-    color: #1f2937;
+    line-height: 1.8;
+    color: #e2e8f0;  /* Lighter body text */
     font-size: 15px;
+    padding: 1rem;
+    background: rgba(51, 65, 85, 0.8);  /* Semi-transparent dark */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+@media (max-width: 768px) {
+    .intro-text {
+        font-size: 14px;
+        padding: 0.75rem;
+    }
+}
+
+/* Current Price Section - Adjusted for dark theme */
+.current-price-card {
+    background: linear-gradient(135deg, #10b981, #059669);  /* Keep green for positives */
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    margin: 1rem 0;
+}
+.current-price-card .negative {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+@media (max-width: 768px) {
+    .current-price-card {
+        font-size: 1rem;
+        padding: 1rem;
+    }
+}
+
+/* Ensure font fallback for symbols and light text */
+.stApp * {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif !important;
+    color: #f1f5f9;  /* Global light text override */
+}
+
+/* General responsiveness: Reduce padding on mobile */
+@media (max-width: 768px) {
+    .stApp {
+        font-size: 13px;
+    }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.25rem !important; }
+    h3 { font-size: 1.1rem !important; }
+    section[data-testid="stMarkdownContainer"] {
+        padding: 0.5rem !important;
+        background: transparent;  /* No bg on dark mobile */
+    }
 }
