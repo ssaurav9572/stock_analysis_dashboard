@@ -80,16 +80,15 @@ def show_introduction(stock, company):
                 st.write(f"**{key}:** {value}")
 
         # ✅ Company officers - Using officer.html template
+        # ✅ Company officers - Static cards with optional toggle via st.toggle
         st.subheader("👨‍💼 Company Officers")
         officers = info.get("companyOfficers", [])
         valid_officers = [o for o in officers if o.get("name") and o.get("title") and o.get("totalPay")]
 
         if valid_officers:
-            officer_file = BASE_DIR / "templates" / "officer.html"
-            officer_html = officer_file.read_text(encoding="utf-8")
             for officer in valid_officers[:5]:
                 full_name = officer.get("name", "N/A")
-                collapsed_name = clean_officer_name(full_name)  # For display if needed
+                collapsed_name = clean_officer_name(full_name)
                 title = officer.get("title", "N/A")
                 age = officer.get("age", "N/A")
                 total_pay = officer.get("totalPay")
@@ -98,9 +97,17 @@ def show_introduction(stock, company):
                 else:
                     total_pay = "N/A"
 
-                # Render as plain card—no expander arrow
-                rendered_html = officer_html.replace("{{ name }}", full_name).replace("{{ title }}", title).replace("{{ age }}", str(age)).replace("{{ total_pay }}", total_pay)
-                st.markdown(f'<div class="officer-card">{rendered_html}</div>', unsafe_allow_html=True)
+                # Use st.toggle for expand/collapse without icons
+                with st.expander(collapsed_name, expanded=False):  # This still has arrow—wait, no: to avoid, use st.container + toggle
+                    # Alternative: Plain markdown card
+                    st.markdown(f"""
+                    <div class="officer-card">
+                        <strong>Name:</strong> {full_name}<br>
+                        <strong>Title:</strong> {title}<br>
+                        <strong>Age:</strong> {age}<br>
+                        <strong>Total Pay:</strong> {total_pay}
+                    </div>
+                    """, unsafe_allow_html=True)
         else:
             st.info("No valid officer information available.")
 
