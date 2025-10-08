@@ -30,12 +30,18 @@ h1, h2, h3, h4, h5, h6 {
     content: none !important;  /* Suppress text like 'keyboard_double_arrow_right' */
 }
 
-/* NEW: Strong suppression for expanders and metric deltas */
+/* ENHANCED: Stronger suppression for expanders and metric deltas */
 .stExpander > label::before,
-.stMetricDelta::before {
+.stMetricDelta::before,
+[data-testid="metric-delta"]::before,
+[data-testid="stMetricDelta"]::before {
     content: '' !important;
     display: none !important;
     visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
 }
 .stExpander > label {
     padding-left: 0 !important;  /* Remove space for arrow */
@@ -125,6 +131,7 @@ section[data-testid="stSidebar"] * {
         visibility: hidden !important;
         width: 0 !important;
         height: 0 !important;
+        font-size: 0 !important;
     }
     .stExpander > label {
         padding-left: 0 !important;
@@ -149,6 +156,7 @@ section[data-testid="stSidebar"] * {
         overflow: hidden !important;
         position: absolute !important;  /* Off-screen if needed */
         left: -9999px !important;
+        font-size: 0 !important;
     }
     /* Clip any overlapping text */
     .stExpander label,
@@ -302,6 +310,93 @@ section[data-testid="stSidebar"] * {
     display: inline !important;
 }
 
+/* Custom HTML Toggle for Officers (CSS-only accordion) */
+.custom-toggle {
+    margin-bottom: 1rem;
+}
+.custom-toggle input[type="checkbox"] {
+    display: none;  /* Hide checkbox */
+}
+.custom-toggle label {
+    display: block;
+    padding: 12px;
+    background: linear-gradient(to bottom, #334155, #475569);
+    color: #e2e8f0;
+    font-weight: 600;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    border-left: 4px solid #3b82f6;
+    transition: background 0.2s ease;
+    position: relative;
+}
+.custom-toggle label:hover {
+    background: linear-gradient(to bottom, #475569, #64748b);
+}
+.custom-toggle label::after {
+    content: '+';  /* Custom + text instead of icon */
+    position: absolute;
+    right: 12px;
+    font-size: 18px;
+    transition: transform 0.2s ease;
+}
+.custom-toggle input:checked + label::after {
+    content: '−';  /* - when open */
+    transform: rotate(180deg);
+}
+.custom-toggle .content {
+    max-height: 0;
+    overflow: hidden;
+    background: #334155;
+    border-radius: 0 0 8px 8px;
+    transition: max-height 0.3s ease;
+    padding: 0 12px;
+}
+.custom-toggle input:checked + label + .content {
+    max-height: 200px;  /* Adjust based on content */
+    padding: 12px;
+}
+.custom-toggle .content strong {
+    color: #60a5fa;
+}
+
+/* Custom Metric Cards (No icons, text deltas) */
+.custom-metric {
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    color: #f1f5f9;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+}
+.custom-metric .delta {
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+.custom-metric .delta.positive {
+    color: #10b981;  /* Green text */
+}
+.custom-metric .delta.negative {
+    color: #ef4444;  /* Red text */
+}
+
+/* Mobile tweaks for custom elements */
+@media (max-width: 768px) {
+    .custom-toggle label {
+        font-size: 14px;
+        padding: 10px;
+    }
+    .custom-toggle .content {
+        font-size: 13px;
+        padding: 10px;
+    }
+    .custom-metric {
+        padding: 0.75rem;
+        font-size: 14px;
+    }
+}
+
 /* Ensure font fallback for symbols and light text */
 .stApp * {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif !important;
@@ -320,4 +415,18 @@ section[data-testid="stSidebar"] * {
         padding: 0.5rem !important;
         background: transparent;  /* No bg on dark mobile */
     }
+}
+
+/* ADDITIONAL: Global suppression for any icon text fallbacks in Streamlit components */
+.stMetricDelta,
+.stExpander label [class*="arrow"],
+::before[content*="arrow"],
+::before[content*="keyboard"] {
+    content: none !important;
+    display: none !important;
+    visibility: hidden !important;
+    text-indent: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
