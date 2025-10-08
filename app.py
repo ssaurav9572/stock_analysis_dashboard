@@ -1,7 +1,7 @@
 import streamlit as st
 import yfinance as yf
 from config.stock_categories import stock_categories
-from utils import fundamentals, charts, indicators, metrics  # Assuming these exist based on your structure
+from utils import fundamentals, charts, indicators, metrics
 from pathlib import Path
 
 # Load CSS
@@ -12,6 +12,28 @@ def load_css(file_name):
 # Streamlit page config
 st.set_page_config(page_title="📊 Stock Market Dashboard", layout="wide")
 load_css("styles/style.css")
+
+# NEW: Load Material Icons font to fix arrow rendering
+st.markdown("""
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+    .stApp [class*="material-icons"] {
+        font-family: 'Material Icons' !important;
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 st.title("📊 Stock Market Dashboard")
 
