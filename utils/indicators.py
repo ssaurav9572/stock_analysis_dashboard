@@ -15,11 +15,26 @@ def show_indicators(stock, company):
         rs = avg_gain / avg_loss
         hist["RSI"] = 100 - (100 / (1 + rs))
 
+        dark_template = {
+            "layout": {
+                "paper_bgcolor": "#1e293b",
+                "plot_bgcolor": "#1e293b",
+                "font": {"color": "#e2e8f0"},
+                "xaxis": {"gridcolor": "#334155", "color": "#e2e8f0"},
+                "yaxis": {"gridcolor": "#334155", "color": "#e2e8f0"}
+            }
+        }
+
         fig_rsi = go.Figure()
-        fig_rsi.add_trace(go.Scatter(x=hist.index, y=hist["RSI"], mode="lines", name="RSI"))
-        fig_rsi.add_hline(y=70, line=dict(color="red", dash="dash"))
-        fig_rsi.add_hline(y=30, line=dict(color="green", dash="dash"))
-        fig_rsi.update_layout(yaxis_title="RSI")
+        fig_rsi.add_trace(go.Scatter(x=hist.index, y=hist["RSI"], mode="lines", name="RSI", line=dict(color="#60a5fa")))
+        fig_rsi.add_hline(y=70, line=dict(color="#ef4444", dash="dash"), annotation_text="Overbought")
+        fig_rsi.add_hline(y=30, line=dict(color="#10b981", dash="dash"), annotation_text="Oversold")
+        fig_rsi.update_layout(
+            yaxis_title="RSI",
+            template=dark_template,
+            showlegend=True,
+            legend=dict(bgcolor="#334155", bordercolor="#475569", font=dict(color="#e2e8f0"))
+        )
         st.plotly_chart(fig_rsi, use_container_width=True)
 
         # MACD
@@ -29,9 +44,14 @@ def show_indicators(stock, company):
         hist["Signal"] = hist["MACD"].ewm(span=9, adjust=False).mean()
 
         fig_macd = go.Figure()
-        fig_macd.add_trace(go.Scatter(x=hist.index, y=hist["MACD"], mode="lines", name="MACD"))
-        fig_macd.add_trace(go.Scatter(x=hist.index, y=hist["Signal"], mode="lines", name="Signal"))
-        fig_macd.update_layout(yaxis_title="MACD")
+        fig_macd.add_trace(go.Scatter(x=hist.index, y=hist["MACD"], mode="lines", name="MACD", line=dict(color="#3b82f6")))
+        fig_macd.add_trace(go.Scatter(x=hist.index, y=hist["Signal"], mode="lines", name="Signal", line=dict(color="#f59e0b")))
+        fig_macd.update_layout(
+            yaxis_title="MACD",
+            template=dark_template,
+            showlegend=True,
+            legend=dict(bgcolor="#334155", bordercolor="#475569", font=dict(color="#e2e8f0"))
+        )
         st.plotly_chart(fig_macd, use_container_width=True)
 
     else:
