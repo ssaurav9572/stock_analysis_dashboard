@@ -296,7 +296,7 @@ section[data-testid="stSidebar"] * {
 .custom-toggle {
     margin-bottom: 1rem;
     position: relative;  /* Ensure proper stacking */
-    overflow: hidden;  /* Prevent content bleed */
+    overflow: visible;  /* Changed to visible to prevent clipping */
 }
 .custom-toggle input[type="checkbox"] {
     display: none;  /* Hide checkbox */
@@ -313,6 +313,10 @@ section[data-testid="stSidebar"] * {
     transition: background 0.2s ease;
     position: relative;
     z-index: 2;  /* Label above content */
+    user-select: none;  /* Prevent text selection on mobile */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 .custom-toggle label:hover {
     background: linear-gradient(to bottom, #475569, #64748b);
@@ -334,52 +338,62 @@ section[data-testid="stSidebar"] * {
     overflow: hidden !important;  /* Force hidden initially */
     background: #334155;
     border-radius: 0 0 8px 8px;
-    transition: max-height 0.3s ease;
+    transition: max-height 0.3s ease, padding 0.3s ease;  /* Smooth transition */
     padding: 0 12px;  /* Zero padding when closed */
     position: relative;
     z-index: 1;  /* Below label */
+    display: block;  /* Ensure display block */
 }
 .custom-toggle input:checked + label + .content {
-    max-height: 200px;  /* Adjust based on content */
+    max-height: 500px;  /* Increased for more content */
     padding: 12px;
 }
 .custom-toggle .content strong {
     color: #60a5fa;
 }
 
-/* Mobile tweaks for custom elements - ENHANCED to prevent content show */
+/* Mobile tweaks for custom elements - ENHANCED to prevent content show and fix expansion */
 @media (max-width: 768px) {
     .custom-toggle {
         margin-bottom: 0.75rem;
-        overflow: hidden !important;  /* Extra layer to clip any bleed */
+        overflow: visible !important;  /* Ensure no clipping on mobile */
     }
     .custom-toggle label {
         font-size: 14px;
         padding: 10px;
         border-radius: 8px;  /* Full round on mobile */
+        min-height: 44px;  /* Touch target size for mobile */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
     .custom-toggle .content {
         font-size: 13px;
         padding: 0 !important;  /* Ensure zero when closed */
         max-height: 0 !important;  /* Reinforce */
-        transition: max-height 0.2s ease;  /* Faster on mobile */
+        transition: max-height 0.3s ease, padding 0.3s ease;  /* Slower for visibility */
+        overflow: hidden !important;
     }
     .custom-toggle input:checked + label + .content {
-        max-height: 300px;  /* Slightly more for mobile scrolling */
+        max-height: 600px !important;  /* Much higher to accommodate all content */
         padding: 10px !important;
     }
-    /* Hide any potential overflow or hidden text in officers */
+    /* Remove opacity fade for reliability on mobile */
     .custom-toggle .content > * {
-        opacity: 0;  /* Hidden until expanded */
-        transition: opacity 0.3s ease;
+        opacity: 1;  /* Always visible, rely on max-height */
+        transition: none;  /* No opacity transition to avoid issues */
     }
     .custom-toggle input:checked + label + .content > * {
         opacity: 1;
     }
+    /* Enhance touch interaction */
+    .custom-toggle input[type="checkbox"] + label {
+        touch-action: manipulation;  /* Better touch response */
+    }
     .officer-card {
         margin-top: 12px !important;
         padding-top: 16px !important;
-        overflow: hidden !important;  /* Clip any bleed */
+        overflow: visible !important;  /* Allow content to show */
     }
     h3, h4 {
         margin-top: 16px !important;  /* Space from any hidden elements */
