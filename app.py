@@ -36,9 +36,12 @@ st.markdown("""
 
 st.title("📊 Stock Market Dashboard")
 
-# Sidebar selections (keep for filters)
-category = st.sidebar.selectbox("Select Stock Category", list(stock_categories.keys()))
-company = st.sidebar.selectbox("Select a Company", list(stock_categories[category].keys()))
+# Top selections (replaces sidebar)
+col1, col2 = st.columns(2)
+with col1:
+    category = st.selectbox("Select Stock Category", list(stock_categories.keys()), key="category_select")
+with col2:
+    company = st.selectbox("Select a Company", list(stock_categories[category].keys()), key="company_select")
 ticker = stock_categories[category][company]
 
 if ticker:
