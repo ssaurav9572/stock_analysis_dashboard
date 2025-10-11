@@ -430,3 +430,49 @@ section[data-testid="stSidebar"] * {
     height: 0 !important;
     overflow: hidden !important;
 }
+
+/* Ultimate suppression of keyboard_double_arrow_right on mobile */
+@media (max-width: 768px) {
+    /* Expanders */
+    .stExpander label::before,
+    .stExpander label span {
+        content: '' !important;
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        font-size: 0 !important;
+    }
+
+    /* Metric deltas */
+    .stMetricDelta::before,
+    [data-testid="metric-delta"]::before,
+    [data-testid="stMetricDelta"]::before {
+        content: '' !important;
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        font-size: 0 !important;
+    }
+
+    /* Force remove any fallback text inside icons */
+    .material-icons,
+    [class*="material-icons"]::before {
+        content: '' !important;
+        display: inline-block !important;
+        font-size: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        visibility: hidden !important;
+    }
+
+    /* Push any residual fallback text off-screen */
+    body * {
+        text-indent: 0 !important;
+        white-space: normal !important;
+    }
+}
