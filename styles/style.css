@@ -121,58 +121,40 @@ section[data-testid="stSidebar"] * {
     .stSelectbox {
         font-size: 13px !important;  /* Slightly larger for touch */
     }
-    /* ENHANCED Mobile icon fix: Smaller, hidden text fallbacks, and no overlap */
-    [class*="material-icons"] {
-        font-size: 14px !important;
-    }
-    .stMetric > div > div:last-child::before,
-    .stExpander > label::before {
-        display: none !important;  /* Aggressive hide on mobile */
-        visibility: hidden !important;
-        width: 0 !important;
-        height: 0 !important;
-        font-size: 0 !important;
-    }
-    .stExpander > label {
-        padding-left: 0 !important;
-        margin-left: -8px !important;  /* Pull left to avoid overlap */
-    }
-    /* Prevent overlap on headers/officers */
-    h3, h4, .officer-card {
-        position: relative;
-        z-index: 10;  /* Ensure text above any hidden elements */
-        margin-top: 8px !important;
-    }
-    /* Ultimate mobile arrow killer */
+    /* ULTRA-ENHANCED Mobile icon fix: Aggressive hiding of fallback text */
+    [class*="material-icons"],
+    [class*="material-icons"]::before,
     .stExpander label::before,
     .stMetricDelta::before,
     [data-testid="stMetricDelta"]::before,
-    .material-icons::before {
-        content: '' !important;
+    [data-testid="metric-delta"]::before,
+    ::before[content*="keyboard"],
+    ::before[content*="arrow"] {
+        content: none !important;
         display: none !important;
         visibility: hidden !important;
         width: 0 !important;
         height: 0 !important;
         overflow: hidden !important;
-        position: absolute !important;  /* Off-screen if needed */
-        left: -9999px !important;
         font-size: 0 !important;
+        text-indent: -9999px !important;
+        position: absolute !important;
+        left: -9999px !important;
+        opacity: 0 !important;
+        z-index: -1 !important;
     }
-    /* Clip any overlapping text */
-    .stExpander label,
+    .stExpander > label,
     .stMetric > label {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        position: relative !important;
         overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;  /* Prevent wrap/overlap */
     }
-    /* Officer cards: Extra margin to avoid header bleed */
-    .officer-card {
-        margin-top: 12px !important;
-        padding-top: 16px !important;
-    }
-    h3, h4 {
-        margin-top: 16px !important;  /* Space from any hidden elements */
-        overflow: visible !important;
+    /* Prevent any overlap or bleed */
+    .stExpander,
+    .stMetric {
+        position: relative !important;
+        z-index: 1 !important;
     }
 }
 
@@ -310,9 +292,11 @@ section[data-testid="stSidebar"] * {
     display: inline !important;
 }
 
-/* Custom HTML Toggle for Officers (CSS-only accordion) */
+/* Custom HTML Toggle for Officers (CSS-only accordion) - ENHANCED for mobile */
 .custom-toggle {
     margin-bottom: 1rem;
+    position: relative;  /* Ensure proper stacking */
+    overflow: hidden;  /* Prevent content bleed */
 }
 .custom-toggle input[type="checkbox"] {
     display: none;  /* Hide checkbox */
@@ -328,6 +312,7 @@ section[data-testid="stSidebar"] * {
     border-left: 4px solid #3b82f6;
     transition: background 0.2s ease;
     position: relative;
+    z-index: 2;  /* Label above content */
 }
 .custom-toggle label:hover {
     background: linear-gradient(to bottom, #475569, #64748b);
@@ -338,6 +323,7 @@ section[data-testid="stSidebar"] * {
     right: 12px;
     font-size: 18px;
     transition: transform 0.2s ease;
+    z-index: 3;
 }
 .custom-toggle input:checked + label::after {
     content: '−';  /* - when open */
@@ -345,11 +331,13 @@ section[data-testid="stSidebar"] * {
 }
 .custom-toggle .content {
     max-height: 0;
-    overflow: hidden;
+    overflow: hidden !important;  /* Force hidden initially */
     background: #334155;
     border-radius: 0 0 8px 8px;
     transition: max-height 0.3s ease;
-    padding: 0 12px;
+    padding: 0 12px;  /* Zero padding when closed */
+    position: relative;
+    z-index: 1;  /* Below label */
 }
 .custom-toggle input:checked + label + .content {
     max-height: 200px;  /* Adjust based on content */
@@ -357,6 +345,48 @@ section[data-testid="stSidebar"] * {
 }
 .custom-toggle .content strong {
     color: #60a5fa;
+}
+
+/* Mobile tweaks for custom elements - ENHANCED to prevent content show */
+@media (max-width: 768px) {
+    .custom-toggle {
+        margin-bottom: 0.75rem;
+        overflow: hidden !important;  /* Extra layer to clip any bleed */
+    }
+    .custom-toggle label {
+        font-size: 14px;
+        padding: 10px;
+        border-radius: 8px;  /* Full round on mobile */
+    }
+    .custom-toggle .content {
+        font-size: 13px;
+        padding: 0 !important;  /* Ensure zero when closed */
+        max-height: 0 !important;  /* Reinforce */
+        transition: max-height 0.2s ease;  /* Faster on mobile */
+    }
+    .custom-toggle input:checked + label + .content {
+        max-height: 300px;  /* Slightly more for mobile scrolling */
+        padding: 10px !important;
+    }
+    /* Hide any potential overflow or hidden text in officers */
+    .custom-toggle .content > * {
+        opacity: 0;  /* Hidden until expanded */
+        transition: opacity 0.3s ease;
+    }
+    .custom-toggle input:checked + label + .content > * {
+        opacity: 1;
+    }
+    .officer-card {
+        margin-top: 12px !important;
+        padding-top: 16px !important;
+        overflow: hidden !important;  /* Clip any bleed */
+    }
+    h3, h4 {
+        margin-top: 16px !important;  /* Space from any hidden elements */
+        overflow: visible !important;
+        position: relative;
+        z-index: 10;
+    }
 }
 
 /* Custom Metric Cards (No icons, text deltas) */
@@ -383,14 +413,6 @@ section[data-testid="stSidebar"] * {
 
 /* Mobile tweaks for custom elements */
 @media (max-width: 768px) {
-    .custom-toggle label {
-        font-size: 14px;
-        padding: 10px;
-    }
-    .custom-toggle .content {
-        font-size: 13px;
-        padding: 10px;
-    }
     .custom-metric {
         padding: 0.75rem;
         font-size: 14px;
@@ -451,4 +473,23 @@ section[data-testid="stSidebar"] * {
 .stExpander > label {
     padding-left: 0 !important;
     margin-left: 0 !important;
+}
+
+/* ULTIMATE MOBILE FIX: Target any remaining fallback text globally */
+@media (max-width: 768px) {
+    *::before,
+    *::after {
+        content: none !important;  /* Nuclear option: Suppress all pseudo-elements if they contain fallback text */
+    }
+    /* But re-enable necessary ones like custom-toggle */
+    .custom-toggle label::after {
+        content: '+' !important;
+        display: inline-block !important;
+        visibility: visible !important;
+        position: absolute !important;
+        right: 12px !important;
+    }
+    .custom-toggle input:checked + label::after {
+        content: '−' !important;
+    }
 }
