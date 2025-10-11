@@ -5,6 +5,25 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
     line-height: 1.6;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* CRITICAL: Remove all top padding and margins from main container */
+.main .block-container {
+    padding-top: 0.5rem !important;
+    padding-bottom: 1rem !important;
+    margin-top: 0 !important;
+}
+
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+
+/* Remove spacing from first element */
+.main .block-container > div:first-child {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 /* Headings - Simplified to solid light color for better visibility */
@@ -12,6 +31,16 @@ h1, h2, h3, h4, h5, h6 {
     color: #e2e8f0 !important;  /* Solid light color - no gradient to avoid rendering issues */
     font-weight: 700 !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);  /* Subtle shadow for depth */
+    margin-top: 0 !important;
+    margin-bottom: 0.5rem !important;
+    padding-top: 0 !important;
+}
+
+/* Title specifically */
+h1:first-of-type {
+    margin-top: 0 !important;
+    padding-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 /* ENHANCED: Fix for arrow icons rendering as text (e.g., keyboard_double_arrow_right) */
@@ -43,6 +72,7 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden !important;
     font-size: 0 !important;
 }
+
 .stExpander > label {
     padding-left: 0 !important;  /* Remove space for arrow */
 }
@@ -52,9 +82,11 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Material Icons' !important;
     content: 'arrow_upward' !important;  /* Or use CSS for dynamic up/down */
 }
+
 .stMetric [data-testid="metric-delta"] {
     color: #10b981 !important;  /* Green for positive */
 }
+
 .stMetric [data-testid="metric-delta-negative"] {
     color: #ef4444 !important;  /* Red for negative */
 }
@@ -66,6 +98,7 @@ section[data-testid="stSidebar"] {
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);  /* Deeper shadow */
 }
+
 section[data-testid="stSidebar"] * {
     color: #e2e8f0 !important;  /* Lighter sidebar text */
     font-weight: 600;
@@ -77,29 +110,44 @@ section[data-testid="stSidebar"] * {
     border: 1px solid #475569 !important;  /* Subtle dark border */
     border-radius: 6px !important;
     color: #e2e8f0 !important;  /* Light text in selectbox */
+    margin-top: 0 !important;
+    margin-bottom: 0.25rem !important;
+    padding-top: 0 !important;
 }
+
+/* Remove spacing from column containers */
+div[data-testid="column"] {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
 .stSelectbox > div > div {
     background-color: #1e1e1e !important;  /* Darken the input field */
     color: #e2e8f0 !important;
 }
+
 .stSelectbox .css-1gyyuii {  /* Target dropdown arrow/button */
     background-color: #334155 !important;
     border: none !important;
 }
+
 .stSelectbox .css-1gyyuii:hover {
     background-color: #475569 !important;
 }
+
 /* Darken dropdown menu/options */
 .stSelectbox div[role="listbox"] {
     background-color: #1e293b !important;
     border: 1px solid #475569 !important;
     color: #e2e8f0 !important;
 }
+
 .stSelectbox div[role="option"] {
     background-color: #1e293b !important;
     color: #e2e8f0 !important;
     border-bottom: 1px solid #334155 !important;
 }
+
 .stSelectbox div[role="option"]:hover {
     background-color: #334155 !important;
     color: #f1f5f9 !important;
@@ -113,14 +161,19 @@ section[data-testid="stSidebar"] * {
         border-radius: 0;
         background: #1e293b !important;  /* Solid dark on mobile */
     }
+    
     section[data-testid="stSidebar"] .stSelectbox > div > div > div {
         font-size: 12px;
         color: #e2e8f0;
         background-color: #1e1e1e !important;  /* Ensure mobile selectbox dark */
     }
+    
     .stSelectbox {
         font-size: 13px !important;  /* Slightly larger for touch */
+        margin-top: 0 !important;
+        margin-bottom: 0.25rem !important;
     }
+    
     /* ULTRA-ENHANCED Mobile icon fix: Aggressive hiding of fallback text */
     [class*="material-icons"],
     [class*="material-icons"]::before,
@@ -143,6 +196,7 @@ section[data-testid="stSidebar"] * {
         opacity: 0 !important;
         z-index: -1 !important;
     }
+    
     .stExpander > label,
     .stMetric > label {
         padding-left: 0 !important;
@@ -150,11 +204,38 @@ section[data-testid="stSidebar"] * {
         position: relative !important;
         overflow: hidden !important;
     }
+    
     /* Prevent any overlap or bleed */
     .stExpander,
     .stMetric {
         position: relative !important;
         z-index: 1 !important;
+    }
+    
+    /* Reduce top spacing on mobile */
+    h1 {
+        margin-top: 0 !important;
+        margin-bottom: 0.25rem !important;
+        padding-top: 0 !important;
+        font-size: 1.4rem !important;
+    }
+    
+    /* Tabs top spacing */
+    .stTabs [data-baseweb="tab-list"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 0.5rem !important;
+    }
+    /* Columns spacing on mobile */
+    div[data-testid="column"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    /* Main container mobile */
+    .main .block-container {
+        padding-top: 0.25rem !important;
     }
 }
 
@@ -169,11 +250,13 @@ section[data-testid="stSidebar"] * {
     transition: all 0.2s ease;
     border: none;
 }
+
 .stButton button:hover, .stDownloadButton button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(59, 130, 246, 0.5);  /* Brighter hover */
     background: linear-gradient(to right, #1d4ed8, #1e40af);
 }
+
 @media (max-width: 768px) {
     .stButton button, .stDownloadButton button {
         padding: 0.5rem 1rem;  /* Smaller touch targets */
@@ -195,6 +278,7 @@ section[data-testid="stSidebar"] * {
     position: relative;
     overflow: hidden;
 }
+
 .metric-card::before {
     content: 'Metrics';
     font-size: 1.2rem;
@@ -204,6 +288,7 @@ section[data-testid="stSidebar"] * {
     opacity: 0.9;
     color: #e2e8f0;
 }
+
 .metric-card:hover {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 8px 20px rgba(30, 64, 175, 0.5);
@@ -217,9 +302,11 @@ section[data-testid="stSidebar"] * {
     background: #1e293b;  /* Dark table bg */
     color: #f1f5f9;  /* Light text in tables */
 }
+
 .stDataFrame > div table {
     color: #f1f5f9;  /* Ensure table text is light */
 }
+
 @media (max-width: 768px) {
     .stDataFrame > div {
         font-size: 12px;
@@ -237,9 +324,11 @@ section[data-testid="stSidebar"] * {
     border-left: 4px solid #3b82f6;
     transition: box-shadow 0.2s ease;
 }
+
 .officer-card:hover {
     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
+
 .officer-card strong {
     color: #60a5fa;  /* Lighter blue for emphasis */
     font-size: 1.1em;
@@ -255,11 +344,14 @@ section[data-testid="stSidebar"] * {
     background: rgba(51, 65, 85, 0.8);  /* Semi-transparent dark */
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 0 !important;
 }
+
 @media (max-width: 768px) {
     .intro-text {
         font-size: 14px;
         padding: 0.75rem;
+        margin-top: 0 !important;
     }
 }
 
@@ -274,15 +366,19 @@ section[data-testid="stSidebar"] * {
     font-weight: bold;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
     margin: 1rem 0;
+    margin-top: 0.5rem !important;
 }
+
 .current-price-card .negative {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
 }
+
 @media (max-width: 768px) {
     .current-price-card {
         font-size: 1rem;
         padding: 1rem;
+        margin-top: 0.25rem !important;
     }
 }
 
@@ -297,10 +393,13 @@ section[data-testid="stSidebar"] * {
     margin-bottom: 1rem;
     position: relative;  /* Ensure proper stacking */
     overflow: visible;  /* Changed to visible to prevent clipping */
+    margin-top: 0 !important;
 }
+
 .custom-toggle input[type="checkbox"] {
     display: none;  /* Hide checkbox */
 }
+
 .custom-toggle label {
     display: block;
     padding: 12px;
@@ -317,10 +416,13 @@ section[data-testid="stSidebar"] * {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    margin-top: 0 !important;
 }
+
 .custom-toggle label:hover {
     background: linear-gradient(to bottom, #475569, #64748b);
 }
+
 .custom-toggle label::after {
     content: '+';  /* Custom + text instead of icon */
     position: absolute;
@@ -329,10 +431,12 @@ section[data-testid="stSidebar"] * {
     transition: transform 0.2s ease;
     z-index: 3;
 }
+
 .custom-toggle input:checked + label::after {
     content: '−';  /* - when open */
     transform: rotate(180deg);
 }
+
 .custom-toggle .content {
     max-height: 0;
     overflow: hidden !important;  /* Force hidden initially */
@@ -343,11 +447,14 @@ section[data-testid="stSidebar"] * {
     position: relative;
     z-index: 1;  /* Below label */
     display: block;  /* Ensure display block */
+    margin-top: 0 !important;
 }
+
 .custom-toggle input:checked + label + .content {
     max-height: 500px;  /* Increased for more content */
     padding: 12px;
 }
+
 .custom-toggle .content strong {
     color: #60a5fa;
 }
@@ -357,7 +464,9 @@ section[data-testid="stSidebar"] * {
     .custom-toggle {
         margin-bottom: 0.75rem;
         overflow: visible !important;  /* Ensure no clipping on mobile */
+        margin-top: 0 !important;
     }
+    
     .custom-toggle label {
         font-size: 14px;
         padding: 10px;
@@ -366,37 +475,47 @@ section[data-testid="stSidebar"] * {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        margin-top: 0 !important;
     }
+    
     .custom-toggle .content {
         font-size: 13px;
         padding: 0 !important;  /* Ensure zero when closed */
         max-height: 0 !important;  /* Reinforce */
         transition: max-height 0.3s ease, padding 0.3s ease;  /* Slower for visibility */
         overflow: hidden !important;
+        margin-top: 0 !important;
     }
+    
     .custom-toggle input:checked + label + .content {
         max-height: 600px !important;  /* Much higher to accommodate all content */
         padding: 10px !important;
     }
+    
     /* Remove opacity fade for reliability on mobile */
     .custom-toggle .content > * {
         opacity: 1;  /* Always visible, rely on max-height */
         transition: none;  /* No opacity transition to avoid issues */
     }
+    
     .custom-toggle input:checked + label + .content > * {
         opacity: 1;
     }
+    
     /* Enhance touch interaction */
     .custom-toggle input[type="checkbox"] + label {
         touch-action: manipulation;  /* Better touch response */
     }
+    
     .officer-card {
         margin-top: 12px !important;
         padding-top: 16px !important;
         overflow: visible !important;  /* Allow content to show */
+        margin-top: 0 !important;  /* Reduce top margin */
     }
+    
     h3, h4 {
-        margin-top: 16px !important;  /* Space from any hidden elements */
+        margin-top: 8px !important;  /* Reduced space */
         overflow: visible !important;
         position: relative;
         z-index: 10;
@@ -413,14 +532,18 @@ section[data-testid="stSidebar"] * {
     font-weight: bold;
     margin-bottom: 1rem;
     box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+    margin-top: 0 !important;
 }
+
 .custom-metric .delta {
     font-size: 0.9rem;
     margin-top: 0.25rem;
 }
+
 .custom-metric .delta.positive {
     color: #10b981;  /* Green text */
 }
+
 .custom-metric .delta.negative {
     color: #ef4444;  /* Red text */
 }
@@ -430,6 +553,7 @@ section[data-testid="stSidebar"] * {
     .custom-metric {
         padding: 0.75rem;
         font-size: 14px;
+        margin-top: 0 !important;
     }
 }
 
@@ -443,13 +567,33 @@ section[data-testid="stSidebar"] * {
 @media (max-width: 768px) {
     .stApp {
         font-size: 13px;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
     }
-    h1 { font-size: 1.5rem !important; }
+    
+    h1 { 
+        font-size: 1.4rem !important; 
+        margin-top: 0 !important;
+        margin-bottom: 0.25rem !important;
+    }
     h2 { font-size: 1.25rem !important; }
     h3 { font-size: 1.1rem !important; }
+    
     section[data-testid="stMarkdownContainer"] {
         padding: 0.5rem !important;
         background: transparent;  /* No bg on dark mobile */
+        margin-top: 0 !important;
+    }
+    
+    /* Global top margin reduction */
+    div.element-container {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    /* Tabs and content */
+    div[data-testid="stTabPanel"] {
+        padding-top: 0.5rem !important;
     }
 }
 
@@ -495,6 +639,7 @@ section[data-testid="stSidebar"] * {
     *::after {
         content: none !important;  /* Nuclear option: Suppress all pseudo-elements if they contain fallback text */
     }
+    
     /* But re-enable necessary ones like custom-toggle */
     .custom-toggle label::after {
         content: '+' !important;
@@ -503,6 +648,7 @@ section[data-testid="stSidebar"] * {
         position: absolute !important;
         right: 12px !important;
     }
+    
     .custom-toggle input:checked + label::after {
         content: '−' !important;
     }
